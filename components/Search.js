@@ -1,4 +1,6 @@
-import { useState, useEffect, useMemo, useRef } from 'react';
+import {
+  useState, useEffect, useMemo, useRef,
+} from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { View, ScrollView, TouchableOpacity } from 'react-native';
 import debouce from 'lodash.debounce';
@@ -53,19 +55,20 @@ export default function Search({ navigation }) {
       </SafeAreaInsetsContext.Consumer>
 
       <View style={styles.container}>
-      <TextInput
-        ref={inputRef}
-        style={{ marginTop: 20 }}
-        label="Search"
-        mode="outlined"
-        right={<TextInput.Icon icon="close" onPress={() => inputRef.current.setNativeProps({ text: '' })} />}
-        left={<TextInput.Icon icon="magnify" />}
+        <TextInput
+          ref={inputRef}
+          style={{ marginTop: 20 }}
+          label="Search"
+          mode="outlined"
+          right={<TextInput.Icon icon="close" onPress={() => inputRef.current.setNativeProps({ text: '' })} />}
+          left={<TextInput.Icon icon="magnify" />}
         // value={text}
-        onChangeText={(e) => {
-          if (e.length > 3) {
-            debouncedResults(e);
-          }}}
-      />
+          onChangeText={(e) => {
+            if (e.length > 3) {
+              debouncedResults(e);
+            }
+          }}
+        />
         {/* <Searchbar
           style={{ marginTop: 20 }}
           placeholder="Search"

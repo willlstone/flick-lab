@@ -20,9 +20,9 @@ function MyComponent() {
     {
       key: 'search', title: 'Search', focusedIcon: 'card-search', unfocusedIcon: 'card-search-outline',
     },
-    {
-      key: 'account', title: 'Me', focusedIcon: 'heart', unfocusedIcon: 'heart-outline',
-    },
+    // {
+    //   key: 'account', title: 'Me', focusedIcon: 'heart', unfocusedIcon: 'heart-outline',
+    // },
   ]);
 
   const renderScene = ({ route, jumpTo }) => {
@@ -33,8 +33,8 @@ function MyComponent() {
         return <TVPage jumpTo={jumpTo} route={route} />;
       case 'search':
         return <SearchPage jumpTo={jumpTo} route={route} />;
-      case 'account':
-        return <AccountPage jumpTo={jumpTo} route={route} />;
+      // case 'account':
+      //   return <AccountPage jumpTo={jumpTo} route={route} />;
     }
   };
 
