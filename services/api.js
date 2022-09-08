@@ -56,7 +56,8 @@ const getPosterPath = (path) =>
   `https://image.tmdb.org/t/p/w780${path}`;
 const getBackground = (path) =>
   `https://image.tmdb.org/t/p/w1280${path}`;
-
+  const getProfile = (path) =>
+  `https://image.tmdb.org/t/p/w185${path}`;
 export const getMovies = async () => {
   const { results } = await fetch(API_URL).then((x) => x.json());
   const movies = results.map(
@@ -157,6 +158,19 @@ export async function fetchImages(movieId, category = "movie") {
     const logos = data.logos.filter(movie => movie.iso_639_1 === "en" && !movie.file_path.includes('.svg')).map(({file_path}) => getPosterPath(file_path));
     const posters = data.posters.map(({file_path}) => getPosterPath(file_path));
     return { images, logos, posters};
+  } catch (error) {
+    console.log.apply(error)
+  }
+}
+
+export async function fetchCast(id, category = "movie") {
+  try {
+    const { data } = await axios.get(`https://api.themoviedb.org/3/${category}/${id}/credits?api_key=${API_KEY}`);
+    const cast = data.cast
+    .filter(crewMember => crewMember.known_for_department === 'Acting')
+    .filter(castMember => castMember.profile_path)
+    .map(castMember => getProfile(castMember.profile_path));
+    return cast;
   } catch (error) {
     console.log.apply(error)
   }

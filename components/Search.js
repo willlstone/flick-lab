@@ -1,37 +1,48 @@
 import {
   useState, useEffect, useMemo, useRef,
 } from 'react';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { View, ScrollView, TouchableOpacity } from 'react-native';
+import {
+  View, ScrollView, TouchableOpacity, Animated, Easing,
+} from 'react-native';
 import debouce from 'lodash.debounce';
 import {
-  Text, TextInput, useTheme, Searchbar, SegmentedButtons, Chip,
+  TextInput, useTheme, SegmentedButtons,
 } from 'react-native-paper';
 import { SafeAreaInsetsContext } from 'react-native-safe-area-context';
 import { search } from '../services/api';
 import FastImage from '../helpers/FastImage';
 
-import GridView from './GridView';
-
 export default function Search({ navigation }) {
-  const [text, setText] = useState('');
+  const [] = useState('');
   const [query, setQuery] = useState('asf');
   const [category, setCategory] = useState('movie');
   const [results, setResults] = useState([]);
-  const { colors } = useTheme();
+  const [isLoading, setIsLoading] = useState(false);
 
   const inputRef = useRef();
+  const rotationDegree = useRef(new Animated.Value(0)).current;
+
+  const startRotationAnimation = (durationMs, rotationDegree) => {
+    Animated.loop(Animated.timing(
+      rotationDegree,
+      {
+        toValue: 360,
+        duration: durationMs,
+        easing: Easing.linear,
+        useNativeDriver: false,
+      },
+    )).start();
+  };
+
+  useEffect(() => {
+    startRotationAnimation(1000, rotationDegree);
+  }, []);
 
   const handleChange = (e) => {
-    console.log('handleChange');
-    // console.log('handle change: ', e);
     setQuery(e);
   };
 
-  const debouncedResults = useMemo(() => {
-    console.log('debouncedResults');
-    return debouce(handleChange, 1000);
-  }, []);
+  const debouncedResults = useMemo(() => debouce(handleChange, 1000), []);
 
   useEffect(() => () => {
     debouncedResults.cancel();
@@ -40,11 +51,12 @@ export default function Search({ navigation }) {
   useEffect(() => {
     const fetchResults = async () => {
       setResults(await search(query, category));
+      await setIsLoading(false);
     };
 
     if (query?.length > 3) {
+      setIsLoading(true);
       fetchResults();
-      // console.log(results);
     }
   }, [query]);
 
@@ -60,32 +72,48 @@ export default function Search({ navigation }) {
           style={{ marginTop: 20 }}
           label="Search"
           mode="outlined"
-          right={<TextInput.Icon icon="close" onPress={() => inputRef.current.setNativeProps({ text: '' })} />}
+          right={
+            isLoading
+              ? <TextInput.Icon icon="loading" style={styles.spinner(rotationDegree)} onPress={() => inputRef.current.setNativeProps({ text: '' })} />
+              : <TextInput.Icon icon="close" onPress={() => inputRef.current.setNativeProps({ text: '' })} />
+        }
+
           left={<TextInput.Icon icon="magnify" />}
-        // value={text}
           onChangeText={(e) => {
             if (e.length > 3) {
               debouncedResults(e);
             }
           }}
         />
-        {/* <Searchbar
-          style={{ marginTop: 20 }}
-          placeholder="Search"
-          onChangeText={(e) => {
-            if (e.length > 3) {
-              console.log('length > 4');
-              debouncedResults(e);
-            }
-            // setText(e);
-          }}
-      // value={text}
-          icon="magnify"
-          loading={false}
-        /> */}
+        {/*
         <View style={styles.row}>
           <Chip selected={category === 'movie'} showSelectedOverlay={category === 'movie'} mode="outlined" style={styles.chip} onPress={() => setCategory('movie')}>Movies</Chip>
           <Chip selected={category === 'tv'} showSelectedOverlay={category === 'tv'} mode="outlined" style={styles.chip} onPress={() => setCategory('tv')}>TV</Chip>
+        </View> */}
+
+        <View style={styles.row}>
+          <SegmentedButtons
+            density="small"
+            value={category}
+            onValueChange={setCategory}
+            buttons={[
+              {
+                value: 'movie',
+                label: 'Movies',
+                icon: 'movie-outline',
+              },
+              {
+                value: 'tv',
+                label: 'TV',
+                icon: 'television-classic',
+              },
+              {
+                value: 'user',
+                label: 'Users',
+                icon: 'account-outline',
+              },
+            ]}
+          />
         </View>
 
         <ScrollView
@@ -123,7 +151,7 @@ const styles = {
     display: 'flex',
     flexDirection: 'row',
     marginVertical: 10,
-    alignItems: 'stretch',
+    justifyContent: 'center',
   },
   chip: {
     marginRight: 10,
@@ -147,4 +175,12 @@ const styles = {
     justifyContent: 'space-evenly',
     zIndex: 1,
   },
+  spinner: (rotationDegree) => ({
+    transform: [{
+      rotateZ: rotationDegree.interpolate({
+        inputRange: [0, 360],
+        outputRange: ['0deg', '360deg'],
+      }),
+    }],
+  }),
 };

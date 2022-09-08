@@ -1,16 +1,13 @@
 import { useContext } from 'react';
-import { ScrollView, TouchableOpacity, Image } from 'react-native';
+import { ScrollView, TouchableOpacity } from 'react-native';
 import { Title } from 'react-native-paper';
 import { StateContext } from '../services/state';
 import MyLoader from './skeleton/bannerListSkeleton';
-import ExpoFastImage from '../helpers/FastImage';
 import FastImage from '../helpers/FastImage';
 
 export default function MovieBanners({
-  movies, title, jumpTo, setDisplayPage, navigation,
+  movies, title, navigation, category,
 }) {
-  const { setMovie } = useContext(StateContext);
-
   if (!movies || movies.length === 0) {
     return (
       <MyLoader />
@@ -25,7 +22,7 @@ export default function MovieBanners({
           <TouchableOpacity
             key={movie.id}
             onPress={() => {
-              navigation.push('Details', { id: movie.id });
+              navigation.push('Details', { id: movie.id, category });
             }}
           >
             <FastImage

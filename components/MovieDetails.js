@@ -23,6 +23,7 @@ import BackButton from './BackButton';
 import HorizontalMovieList from './HorizontalMovieList';
 import MovieBanners from './MovieBanners';
 import FastImage from '../helpers/FastImage';
+import Cast from './Cast';
 
 function Details(props) {
   const { route, navigation } = props;
@@ -295,6 +296,8 @@ function Details(props) {
             category={category}
           />
         </View>
+
+        <Cast id={movie.id} category={category} />
 
       </Animated.ScrollView>
     </View>

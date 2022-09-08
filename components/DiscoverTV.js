@@ -34,7 +34,7 @@ export default function DiscoverTV({ navigation }) {
       </SafeAreaInsetsContext.Consumer>
 
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-        <MovieBanners movies={airingToday.filter((show) => show.language === 'en')} title="Airing Today" navigation={navigation} />
+        <MovieBanners movies={airingToday.filter((show) => show.language === 'en')} title="Airing Today" navigation={navigation} category="tv" />
         <HorizontalMovieGrid movies={popular} title="Popular" param="popular" navigation={navigation} category="tv" />
         <HorizontalMovieList movies={upcoming} title="This Week" param="on_the_air" navigation={navigation} category="tv" />
         <HorizontalMovieGrid movies={topRated} title="Top Rated" param="top_rated" navigation={navigation} category="tv" />
