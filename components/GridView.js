@@ -9,7 +9,7 @@ import GridSwitch from './GridSwitch';
 
 export default function GridView(props) {
   const { navigation } = props;
-  const { movies, exploreParam, category = 'movie' } = props.route.params;
+  const { movies, exploreParam = 'na', category = 'movie' } = props.route.params;
 
   const [gridMovies, setGridMovies] = useState(movies);
   const [currentPage, setCurrentPage] = useState(1);
@@ -29,16 +29,6 @@ export default function GridView(props) {
 
   const displayMovies = () => {
     const newMovies = gridMovies;
-    if ((newMovies.length % 3) == 0) {
-      return newMovies;
-    }
-
-    newMovies.pop();
-    if ((newMovies.length % 3) == 0) {
-      return newMovies;
-    }
-
-    newMovies.pop();
     return newMovies;
   };
 
@@ -85,22 +75,20 @@ export default function GridView(props) {
 
 const styles = StyleSheet.create({
   container: {
-    marginHorizontal: 12,
+    marginHorizontal: 24,
     display: 'flex',
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'space-evenly',
+    justifyContent: 'space-between',
     zIndex: 1,
   },
   singleRowPoster: {
-    // width: 150,
-    // height: 225,
     width: 100,
     height: 150,
     marginBottom: 12,
     borderRadius: 12,
   },
   scrollView: {
-    marginTop: 22,
+    marginTop: 25,
   },
 });

@@ -97,14 +97,6 @@ const renderImages = (start, overflow, images, onPress) => (
           index={start + 1}
         />
       )}
-
-      {/* {overflow && (
-            <TouchableOpacity
-              onPress={(event) => onPress(images[start + 1], start + 1, event)}
-              style={styles.item_view_overlay}>
-              <Text style={styles.text}>{`+${images.length - 5}`}</Text>
-            </TouchableOpacity>
-          )} */}
     </View>
     )}
   </>
@@ -118,7 +110,6 @@ export default class Gridception extends Component {
         {images.length < 3 ? (
           <TwoImages images={images} onPress={onPress} />
         ) : (
-        //   <ImageItem image={images[0]} onPress={onPress} index={0} />
           <View />
         )}
         {images.length > 2 && (

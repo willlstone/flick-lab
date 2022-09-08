@@ -49,18 +49,22 @@ export default function HorizontalMovieGrid({
                   />
                 </TouchableOpacity>
 
-                <TouchableOpacity
-                  key={moviePair[1].id}
-                  onPress={() => {
-                    navigation.navigate('Details', { id: moviePair[1].id, category });
-                  }}
-                >
-                  <FastImage
-                    style={styles.singleRowPoster}
-                    cacheKey={`${moviePair[1].id}-poster-${category}`}
-                    uri={`https://image.tmdb.org/t/p/w500/${moviePair[1].poster}`}
-                  />
-                </TouchableOpacity>
+                {moviePair?.at(1)
+                  && (
+                  <TouchableOpacity
+                    key={moviePair[1].id}
+                    onPress={() => {
+                      navigation.navigate('Details', { id: moviePair[1].id, category });
+                    }}
+                  >
+                    <FastImage
+                      style={styles.singleRowPoster}
+                      cacheKey={`${moviePair[1].id}-poster-${category}`}
+                      uri={`https://image.tmdb.org/t/p/w500/${moviePair[1].poster}`}
+                    />
+                  </TouchableOpacity>
+                  )}
+
               </View>
             ))}
       </ScrollView>

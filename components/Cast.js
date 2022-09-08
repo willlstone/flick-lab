@@ -28,7 +28,6 @@ export default function Cast({ id, category }) {
             <Image source={{ uri: member }} style={styles.castPhoto} resizeMode="cover" />
           </View>
         ))}
-
       </ScrollView>
     </View>
   );

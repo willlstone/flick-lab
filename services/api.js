@@ -1,5 +1,6 @@
 import {Alert} from 'react-native';
 import axios from 'axios';
+import { saveMovieToWatchlist, saveTVToWatchlist } from './storage';
 
 export const fetchLiked = async (user) => {
   const { data } = await fetch(`https://nwated6uoe.execute-api.us-east-1.amazonaws.com/dev?user=${user}`).then((x) => x.json());
@@ -177,19 +178,21 @@ export async function fetchCast(id, category = "movie") {
 }
 
 
-export async function handleLike(item) {
-  // console.log('like');
-  const data = {
-      id: item.id,
-      user: 'WillStone',
-      like: true,
-      poster_path: item.poster,
-      title: item.title,
-      vote_average: item.rating,
-      genres: item.genres,
-      backdrop: item.backdrop
+export async function handleLike(item, category) {
+  // const data = {
+  //     id: item.id,
+  //     user: 'WillStone',
+  //     like: true,
+  //     poster_path: item.poster,
+  //     title: item.title,
+  //     vote_average: item.rating,
+  //     genres: item.genres,
+  //     backdrop: item.backdrop
+  // }
+  if (category === "movie") {
+    return await saveMovieToWatchlist(item);
   }
-  // console.log(req);
+  return await saveTVToWatchlist(item);
 }
 
 export async function getRecommendations(id, category = "movie") {

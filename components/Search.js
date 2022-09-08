@@ -58,7 +58,7 @@ export default function Search({ navigation }) {
       setIsLoading(true);
       fetchResults();
     }
-  }, [query]);
+  }, [query, category]);
 
   return (
     <>
@@ -85,12 +85,6 @@ export default function Search({ navigation }) {
             }
           }}
         />
-        {/*
-        <View style={styles.row}>
-          <Chip selected={category === 'movie'} showSelectedOverlay={category === 'movie'} mode="outlined" style={styles.chip} onPress={() => setCategory('movie')}>Movies</Chip>
-          <Chip selected={category === 'tv'} showSelectedOverlay={category === 'tv'} mode="outlined" style={styles.chip} onPress={() => setCategory('tv')}>TV</Chip>
-        </View> */}
-
         <View style={styles.row}>
           <SegmentedButtons
             density="small"

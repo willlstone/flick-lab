@@ -1,5 +1,4 @@
 import React from 'react';
-import { Text } from 'react-native';
 import { Paragraph } from 'react-native-paper';
 
 function Overview({ text }) {
@@ -15,7 +14,6 @@ const styles = {
     margin: 24,
     fontSize: 16,
     marginBottom: 10,
-    // paddingTop: 16,
   },
 };
 

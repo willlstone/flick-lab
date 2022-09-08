@@ -11,12 +11,15 @@ import {
 } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Title, useTheme } from 'react-native-paper';
+import {
+  Title, useTheme, ToggleButton, IconButton,
+} from 'react-native-paper';
 import { fetchMovieCategory, handleLike } from '../services/api';
 import DoubleClick from './DoubleClick';
 import BackButton from './BackButton';
 import FastImage from '../helpers/FastImage';
 import GridSwitch from './GridSwitch';
+import { getMovieWatchlist, getTVWatchlist } from '../services/storage';
 
 const { width, height } = Dimensions.get('window');
 
@@ -25,7 +28,6 @@ const ITEM_SIZE = Math.round(width * 0.72);
 const EMPTY_ITEM_SIZE = (width - ITEM_SIZE) / 2;
 const BACKDROP_HEIGHT = height * 0.75;
 
-// backdrop function
 function Backdrop({ movies, scrollX }) {
   const { colors } = useTheme();
 
@@ -38,7 +40,6 @@ function Backdrop({ movies, scrollX }) {
       inputRange: [(index - 2) * ITEM_SIZE, (index - 1) * ITEM_SIZE],
       outputRange: [0, width],
     });
-    // renderItem (inside backdrop)
     return (
       <Animated.View
         removeClippedSubviews={false}
@@ -62,11 +63,9 @@ function Backdrop({ movies, scrollX }) {
     );
   });
 
-  // backdrop
   return (
     <View style={{ height: BACKDROP_HEIGHT, width, position: 'absolute' }}>
       <FlatList
-        // data={movies.reverse()}
         data={[{ key: 'empty-left' }, ...movies, { key: 'empty-right' }]}
         keyExtractor={(item) => `${item.key}-backdrop`}
         removeClippedSubviews={false}
@@ -75,7 +74,6 @@ function Backdrop({ movies, scrollX }) {
         maxToRenderPerBatch={5}
         renderItem={renderItem}
       />
-      {/* TODO: fix colors to match theme */}
       <LinearGradient
         colors={['rgba(0, 0, 0, 0)', colors.background]}
         style={{
@@ -90,52 +88,26 @@ function Backdrop({ movies, scrollX }) {
 }
 
 export default function ExploreView(props) {
-  // console.log({props});
-  // const { jumpTo, backFunc, setDisplayPage } = props;
   const { navigation } = props;
   const { movies, exploreParam, category = 'movie' } = props.route.params;
   const [exploreMovies, setExploreMovies] = useState(movies);
-
-  useEffect(() => {
-    console.log({ exploreParam });
-    setExploreMovies(movies);
-  }, [movies]);
-  //   const { item } = props.route.params;
-  // const item = { id: 53 };
-
+  const [movieWatchlist, setMovieWatchlist] = useState([]);
+  const [tvWatchlist, setTVWatchlist] = useState([]);
   const { colors } = useTheme();
-
-  // const {
-  //   setMovie, exploreMovies, exploreFunction, exploreParam, setExploreMovies,
-  // } = useContext(StateContext);
-
-  // const [scrollPosition, setScrollPosition]=useState(0)
-
-  // const [movies, setMovies] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const scrollX = useRef(new Animated.Value(0)).current;
 
-  // const [ref, setRef] = useState(null);
+  useEffect(() => {
+    const getData = async () => {
+      setMovieWatchlist(await getMovieWatchlist());
+      setTVWatchlist(await getTVWatchlist());
+    };
+    getData();
+  }, []);
 
-  // ref.scrollToIndex(4);
-  // this.flatListRef.scrollToIndex(5);
-
-  // scrollX.current = 1000;
-
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     const movies = await getMoviesByGenre(item.id, 1);
-  //     // Add empty items to create fake space
-  //     // [empty_item, ...movies, empty_item]
-  //     // setMovies([{ key: 'empty-left' }, ...movies, { key: 'empty-right' }]);
-  //     setMovies(movies);
-  //   //   console.log(movies.map((movie) => movie.title));
-  //   };
-
-  //   if (movies.length === 0) {
-  //     fetchData(movies);
-  //   }
-  // }, [movies]);
+  useEffect(() => {
+    setExploreMovies(movies);
+  }, [movies]);
 
   const getMore = async () => {
     const newMovies = await fetchMovieCategory(exploreParam, currentPage + 1, category);
@@ -161,6 +133,18 @@ export default function ExploreView(props) {
       extrapolate: 'clamp',
     });
 
+    const isLiked = () => (category === 'movie'
+      ? movieWatchlist?.some((listItem) => listItem.id === item.id)
+      : tvWatchlist?.some((listItem) => listItem.id === item.id));
+
+    const handleTapHeart = async () => {
+      await handleLike(item, category);
+      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      category === 'movie'
+        ? await setMovieWatchlist(await getMovieWatchlist())
+        : await setTVWatchlist(await getTVWatchlist());
+    };
+
     return (
       <DoubleClick
         icon
@@ -168,18 +152,13 @@ export default function ExploreView(props) {
         timeout={1000}
         doubleClick={() => {
           Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-          handleLike(item);
+          handleLike(item, category);
         }}
-        // singleClick={() => navigation.push('Detail', { item })}
         singleClick={() => {
-          // setMovie(item.id);
-          // jumpTo('albums');
-          // setDisplayPage('details');
           navigation.navigate('Details', { id: item.id, category });
         }}
       >
 
-        {/* TODO: switch color here to match theme */}
         <View style={{ width: ITEM_SIZE }}>
           <Animated.View
             style={{
@@ -187,28 +166,29 @@ export default function ExploreView(props) {
               padding: SPACING * 2,
               alignItems: 'center',
               transform: [{ translateY }],
-              // backgroundColor: 'rgba(255,255,255,0.8)',
               backgroundColor: colors.background,
               borderRadius: 34,
               marginTop: '100%',
               marginBottom: 20,
             }}
           >
-            {/* <SharedElement id={`item.${item.id}.poster`} style={styles.shared}> */}
             <FastImage
               uri={item.poster}
               cacheKey={`${item.id}-poster`}
               style={styles.posterImage}
             />
-            {/* </SharedElement> */}
 
-            {/* <SharedElement id={`item.${item.id}.info`}> */}
+            <IconButton
+              icon={isLiked() ? 'heart' : 'heart-outline'}
+              iconColor="rgba(255, 102, 102, 0.88)"
+              size={30}
+              style={{ position: 'absolute', right: 12, bottom: 55 }}
+              onPress={handleTapHeart}
+            />
+
             <Title style={{ fontSize: 24, textAlign: 'center', fontWeight: '800' }} numberOfLines={1}>
               {item.title}
             </Title>
-            {/* <Rating rating={item.rating} /> */}
-            {/* <Genres genres={item.genres} /> */}
-            {/* </SharedElement> */}
           </Animated.View>
         </View>
       </DoubleClick>
@@ -216,38 +196,23 @@ export default function ExploreView(props) {
   });
 
   if (exploreMovies.length === 0) {
-    // return <Loading />;
     return null;
   }
 
-  // Animated.nativeEvent.contentOffset = { x: ITEM_SIZE * 4 }
-
-  // const getItemLayout = (data, index) => (
-  //   { length: 50, offset: ITEM_SIZE * index, index }
-  // )
-
   return (
     <View style={{ ...styles.container, backgroundColor: colors.background }}>
-      {/* <BackButton onPress={() => navigation.goBack()} /> */}
       <GridSwitch onPress={() => navigation.push('Grid', { movies: exploreMovies, exploreParam, category })} icon="view-grid-outline" />
       <Backdrop movies={exploreMovies} scrollX={scrollX} />
       <StatusBar hidden />
       <Animated.FlatList
-      //  ref={(ref) => {
-      //   // setRef(ref);
-      // }}
-        // ref={(ref) => { this.flatListRef = ref; }}
         showsHorizontalScrollIndicator={false}
         data={[{ key: 'empty-left' }, ...exploreMovies, { key: 'empty-right' }]}
-        // extraData={movies}
         keyExtractor={(item) => item.key}
         horizontal
         bounces={false}
         decelerationRate={Platform.OS === 'ios' ? 0 : 0.98}
         contentContainerStyle={{ alignItems: 'center' }}
         snapToInterval={ITEM_SIZE}
-        // snapToAlignment="start"
-        // contentOffset={{x: ITEM_SIZE * 2}}
         onScroll={Animated.event(
           [{ nativeEvent: { contentOffset: { x: scrollX } } }],
           { useNativeDriver: false },
@@ -257,13 +222,9 @@ export default function ExploreView(props) {
         }}
         scrollEventThrottle={16}
         initialNumToRender={1}
-        // initialScrollIndex={4}
-        // onScrollToIndexFailed={() => {console.log('failed to scroll')}}
         maxToRenderPerBatch={5}
         onEndReachedThreshold={0.5}
-        onEndReached={({ }) => {
-          // this.flatListRef.scrollToIndex({animated: true, index: 0});
-          // TODO: uncomment this to get more movies
+        onEndReached={() => {
           getMore();
         }}
         renderItem={renderItem}
@@ -280,8 +241,6 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 24,
-    // backgroundColor: 'white',
-    // backgroundColor: colors.background,
   },
   paragraph: {
     margin: 24,

@@ -9,21 +9,20 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import MaskedView from '@react-native-community/masked-view';
 import {
-  Caption, Title, Chip, ActivityIndicator, useTheme,
+  Caption, Title, Chip, ActivityIndicator, useTheme, IconButton,
 } from 'react-native-paper';
-import { useScrollToTop } from '@react-navigation/native';
+import * as Haptics from 'expo-haptics';
 import Overview from './DummyText';
 import { BANNER_H } from './constants';
 import Gridception from './ImageGrid';
 import {
   fetchCollection,
-  fetchImages, fetchProviders, getRecommendations, getSimilarMovies, fetchMovieDetails,
+  fetchImages, fetchProviders, getRecommendations, getSimilarMovies, fetchMovieDetails, handleLike,
 } from '../services/api';
-import BackButton from './BackButton';
 import HorizontalMovieList from './HorizontalMovieList';
 import MovieBanners from './MovieBanners';
-import FastImage from '../helpers/FastImage';
 import Cast from './Cast';
+import { getMovieWatchlist, getTVWatchlist } from '../services/storage';
 
 function Details(props) {
   const { route, navigation } = props;
@@ -34,6 +33,16 @@ function Details(props) {
   const [movie, setMovie] = useState({});
   const [images, setImages] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [movieWatchlist, setMovieWatchlist] = useState([]);
+  const [tvWatchlist, setTVWatchlist] = useState([]);
+
+  useEffect(() => {
+    const getData = async () => {
+      setMovieWatchlist(await getMovieWatchlist());
+      setTVWatchlist(await getTVWatchlist());
+    };
+    getData();
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -70,6 +79,14 @@ function Details(props) {
     return number_of_seasons > 1 ? `${number_of_seasons} seasons` : '1 season';
   };
 
+  const handleTapHeart = async () => {
+    await handleLike(movie, category);
+    await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    category === 'movie'
+      ? await setMovieWatchlist(await getMovieWatchlist())
+      : await setTVWatchlist(await getTVWatchlist());
+  };
+
   const [providers, setProviders] = useState();
   const [similarMovies, setSimilarMovies] = useState([]);
   const [recommendations, setRecommendations] = useState([]);
@@ -101,7 +118,6 @@ function Details(props) {
   }, [movie]);
 
   const onPress = () => {
-    // url and index of the image you have clicked alongwith onPress event.
     navigation.navigate('Images', { images });
   };
 
@@ -110,10 +126,13 @@ function Details(props) {
     const percentage = Math.round(decimalScore * 10);
     return `${percentage}%`;
   };
+
+  const isLiked = () => (category === 'movie'
+    ? movieWatchlist?.some((item) => item.id === movie.id)
+    : tvWatchlist?.some((item) => item.id === movie.id));
   return (
     <View>
       { isLoading && <ActivityIndicator animating color={colors.primary} style={styles.loader} size="large" pointerEvents="none" /> }
-      {/* <BackButton onPress={() => navigation.goBack()} /> */}
       <Animated.ScrollView
         ref={scrollViewRef}
         showsVerticalScrollIndicator={false}
@@ -126,9 +145,7 @@ function Details(props) {
         <View style={styles.bannerContainer}>
           <Animated.Image
             style={styles.banner(scrollA)}
-            // uri={getHDBackground(movie.backdrop_path)}
             source={{ uri: getHDBackground(movie.backdrop_path) }}
-            // cacheKey={`${movie.id}-backdrop`}
             animated
             addLogging
           />
@@ -144,7 +161,6 @@ function Details(props) {
           )}
             style={StyleSheet.absoluteFill}
           >
-            {/* TODO: Decide should use tint-dark or not */}
             <BlurView tint="dark" intensity={100} style={StyleSheet.absoluteFill}>
               {images?.logos?.at(0) ? (
                 <Animated.Image
@@ -175,23 +191,6 @@ function Details(props) {
                 )}
 
               <View style={styles.row}>
-                {/* <View style={styles.col}>
-                  <SvgUri
-                    width={25}
-                    height={25}
-                    uri={ratingIcons.rottenTomatoes.critic.certifiedFresh}
-                  />
-                  <Caption style={styles.score}>88%</Caption>
-                </View> */}
-
-                {/* <View style={styles.col}>
-                  <Image
-                    style={{ width: 23, aspectRatio: 1 / 1 }}
-                    source={require('../assets/icons/metacritic.png')}
-                  />
-                  <Caption style={styles.score}>88%</Caption>
-                </View> */}
-
                 <View style={styles.col}>
                   <Image
                     style={{ width: 23, aspectRatio: 32 / 23 }}
@@ -199,30 +198,18 @@ function Details(props) {
                   />
                   <Caption style={{ ...styles.score, color: 'rgba(230, 225, 229, 1)', fontWeight: '600' }}>{generatePercentage(movie?.vote_average)}</Caption>
                 </View>
-
-                {/* <View style={styles.col}>
-                  <Image
-                    style={{ width: 30, aspectRatio: 320 / 161 }}
-                    source={require('../assets/icons/imdb.png')}
-                  />
-                  <Caption style={styles.score}>88%</Caption>
-
-                </View> */}
               </View>
 
+              <IconButton
+                icon={isLiked() ? 'heart' : 'heart-outline'}
+                iconColor="rgba(255, 102, 102, 0.88)"
+                size={30}
+                style={{ position: 'absolute', right: 0, bottom: 0 }}
+                onPress={handleTapHeart}
+              />
             </BlurView>
           </MaskedView>
         </View>
-
-        {/* <Button style={{marginLeft: 18, marginRight: 18}} mode="outlined">Favorite</Button>
-        <Button style={{marginLeft: 18, marginRight: 18}} mode="contained">Favorite</Button>
-        <Button style={{marginLeft: 18, marginRight: 18}} mode="contained-tonal">Favorite</Button> */}
-
-        {/* <View style={{marginTop: 10, display: 'flex', flexDirection: 'row', justifyContent: 'space-evenly'}}>
-            <Button mode="outlined">Favorite</Button>
-            <Button mode="contained">Favorite</Button>
-            <Button mode="contained-tonal">Favorite</Button>
-        </View> */}
 
         <Title style={styles.rowHeader}>Where to Watch</Title>
         <View style={{
@@ -242,24 +229,7 @@ function Details(props) {
             && (
               providers?.[activeProvider].map((provider) => <Image source={{ uri: provider }} style={styles.providerImage} key={provider} />)
             )}
-          {/* <View style={{marginRight: 10}}>
-            <View style={{
-              backgroundColor: 'red', borderRadius: 10, width: 17, height: 17, position: 'absolute', right: -5, top: -5, zIndex: 2,
-            }}
-            >
-              <Text style={{ textAlign: 'center', color: 'white' }}>$</Text>
-            </View>
-            <Avatar.Image style={styles.providerIcons} size={40} source={{ uri: providers?.stream[0] }} />
-          </View>
-
-          <View style={{marginRight: 10}}>
-            <Avatar.Image style={styles.providerIcons} size={40} source={{ uri: 'https://image.tmdb.org/t/p/w92/3LQzaSBH1kjQB9oKc4n72dKj8oY.jpg' }} />
-          </View>
-          <View style={{marginRight: 10}}>
-            <Avatar.Image style={styles.providerIcons} size={40} source={{ uri: 'https://image.tmdb.org/t/p/w92/xL9SUR63qrEjFZAhtsipskeAMR7.jpg' }} />
-          </View> */}
         </View>
-        {/* </Card> */}
 
         <Title style={styles.rowHeader}>Images</Title>
         {true && (
@@ -311,8 +281,6 @@ const styles = {
   row: {
     display: 'flex',
     flexDirection: 'row',
-    // justifyContent: 'space-evenly',
-    // alignItems: 'center',
     marginLeft: 24,
   },
   col: {
@@ -341,9 +309,7 @@ const styles = {
     alignItems: 'center',
     marginLeft: 24,
     marginRight: 24,
-    // paddingTop: 10,
     borderRadius: 10,
-    // marginTop: 10,
   },
   providerIcons: {
     marginLeft: 10,
@@ -405,7 +371,6 @@ const styles = {
     marginRight: 24,
     width: '90%',
     marginTop: 350,
-    // marginHorizontal: 24,
     paddingTop: 50,
     height: 100,
     fontWeight: '900',

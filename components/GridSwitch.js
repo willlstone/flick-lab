@@ -17,6 +17,3 @@ export default function GridSwitch({ onPress, icon }) {
     </View>
   );
 }
-
-// unfold-more-vertical
-// view-grid-outline

@@ -66,7 +66,6 @@ function CardTest({ route }) {
       try {
         const { uri } = await downloadResumable.downloadAsync();
         downloadedUrl = uri;
-        // console.log('Finished downloading to ', uri);
       } catch (e) {
         console.error(e);
       }
@@ -78,12 +77,9 @@ function CardTest({ route }) {
         });
         if (result.action === Share.sharedAction) {
           if (result.activityType) {
-            // shared with activity type of result.activityType
           } else {
-            // shared
           }
         } else if (result.action === Share.dismissedAction) {
-          // dismissed
         }
       } catch (error) {
         alert(error.message);

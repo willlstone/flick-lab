@@ -1,60 +1,41 @@
-// import ExploreView from "../components/ExploreView";
-// import { NavigationContainer } from '@react-navigation/native';
-// import { createNativeStackNavigator } from '@react-navigation/native-stack';
-// import Details from "../components/MovieDetails";
-// import Discover from "../components/Discover";
-// import CardTest from "../components/CardTest";
+import React, { createRef, useEffect, useContext } from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { useTheme } from 'react-native-paper';
+import ExploreView from '../components/ExploreView';
+import Details from '../components/MovieDetails';
+import CardTest from '../components/CardTest';
+import AccountHome from '../components/AccountHome';
+import GridView from '../components/GridView';
+import { StateContext } from '../services/state';
 
-// const Stack = createNativeStackNavigator();
+const Stack = createNativeStackNavigator();
 
-// export default function AccountPage({ jumpTo }) {
-//   return (
-//     <NavigationContainer>
-//       <Stack.Navigator
-//       screenOptions={{
-//         headerShown: false
-//       }}>
-//         <Stack.Screen
-//           name="Discover"
-//           component={Discover}
-//         />
-//         <Stack.Screen name="Explore" component={ExploreView} />
-//         <Stack.Screen name="Details" component={Details} />
-//         <Stack.Screen name="Images" component={CardTest} />
-//       </Stack.Navigator>
-//     </NavigationContainer>
-//   );
-// };
+export default function AccountPage() {
+  const theme = useTheme();
+  const { tabIsReset, resetTab } = useContext(StateContext);
+  const navigationRef = createRef();
 
-import * as React from 'react';
-import { SegmentedButtons } from 'react-native-paper';
-
-const MyComponent = () => {
-  const [value, setValue] = React.useState('');
+  useEffect(() => {
+    if (tabIsReset) {
+      resetTab(false);
+      navigationRef.current?.navigate('Home', {});
+    }
+  }, [tabIsReset]);
 
   return (
-    <SegmentedButtons
-     value={value}
-     onValueChange={setValue}
-     buttons={[
-       {
-         value: 'walk',
-         label: 'Walking',
-       },
-       {
-         value: 'train',
-         label: 'Transit',
-       },
-     ]}
-     style={styles.group}
-   />
+    <NavigationContainer theme={theme} ref={navigationRef}>
+      <Stack.Navigator
+        screenOptions={{
+          headerShown: false,
+        }}
+      >
+        <Stack.Screen name="Home" component={AccountHome} />
+        <Stack.Screen name="Explore" component={ExploreView} />
+        <Stack.Screen name="Details" component={Details} />
+        <Stack.Screen name="Images" component={CardTest} />
+        <Stack.Screen name="Grid" component={GridView} />
+      </Stack.Navigator>
+    </NavigationContainer>
   );
-};
-
-const styles = {
-  group: {
-    marginTop: 40,
-  }
 }
-
-export default MyComponent;

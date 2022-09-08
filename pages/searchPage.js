@@ -1,13 +1,13 @@
-import ExploreView from "../components/ExploreView";
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import Details from "../components/MovieDetails";
-import Search from "../components/Search";
-import CardTest from "../components/CardTest";
 import { useTheme } from 'react-native-paper';
-import GridView from "../components/GridView";
-import { StateContext } from "../services/state";
-import { useContext, useEffect, createRef } from "react";
+import React, { useContext, useEffect, createRef } from 'react';
+import ExploreView from '../components/ExploreView';
+import Details from '../components/MovieDetails';
+import Search from '../components/Search';
+import CardTest from '../components/CardTest';
+import GridView from '../components/GridView';
+import { StateContext } from '../services/state';
 
 const Stack = createNativeStackNavigator();
 
@@ -20,15 +20,16 @@ export default function SearchPage({ jumpTo }) {
   useEffect(() => {
     if (tabIsReset) {
       resetTab(false);
-        navigationRef.current?.navigate('Search', {});
+      navigationRef.current?.navigate('Search', {});
     }
   }, [tabIsReset]);
   return (
     <NavigationContainer theme={theme} ref={navigationRef}>
       <Stack.Navigator
-      screenOptions={{
-        headerShown: false
-      }}>
+        screenOptions={{
+          headerShown: false,
+        }}
+      >
         <Stack.Screen name="Search" component={Search} />
         <Stack.Screen name="Explore" component={ExploreView} />
         <Stack.Screen name="Grid" component={GridView} />
@@ -37,4 +38,4 @@ export default function SearchPage({ jumpTo }) {
       </Stack.Navigator>
     </NavigationContainer>
   );
-};
+}
