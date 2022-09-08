@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "flick-lab",
-    "slug": "flick-lab",
+    "name": "Flick Labs",
+    "slug": "flickLab",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -28,6 +28,11 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "5bc2196b-deba-48ff-bf98-cf95e4f48777"
+      }
     }
   }
 }

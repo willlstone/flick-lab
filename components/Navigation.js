@@ -1,4 +1,5 @@
 import { useContext, useState } from 'react';
+import { Dimensions } from 'react-native';
 import { BottomNavigation } from 'react-native-paper';
 import MoviesPage from '../pages/moviesPage';
 import TVPage from '../pages/tvPage';
@@ -9,6 +10,9 @@ import { StateContext } from '../services/state';
 function MyComponent() {
   const [index, setIndex] = useState(0);
   const { tabIsReset, resetTab } = useContext(StateContext);
+  const windowHeight = Dimensions.get('window').height;
+
+  const barHeight = windowHeight < 750 ? 75 : 100;
 
   const [routes] = useState([
     {
@@ -40,7 +44,7 @@ function MyComponent() {
 
   return (
     <BottomNavigation
-      barStyle={{ height: 100 }}
+      barStyle={{ height: barHeight }}
       navigationState={{ index, routes }}
       onIndexChange={setIndex}
       renderScene={renderScene}

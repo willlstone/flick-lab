@@ -24,7 +24,7 @@ import { getMovieWatchlist, getTVWatchlist } from '../services/storage';
 const { width, height } = Dimensions.get('window');
 
 const SPACING = 10;
-const ITEM_SIZE = Math.round(width * 0.72);
+const ITEM_SIZE = height > 1000 ? Math.round(width * 0.5) : Math.round(width * 0.72);
 const EMPTY_ITEM_SIZE = (width - ITEM_SIZE) / 2;
 const BACKDROP_HEIGHT = height * 0.75;
 
@@ -145,6 +145,9 @@ export default function ExploreView(props) {
         : await setTVWatchlist(await getTVWatchlist());
     };
 
+    const windowHeight = Dimensions.get('window').height;
+    const scrollMargin = windowHeight < 750? 75 : 20;
+
     return (
       <DoubleClick
         icon
@@ -169,7 +172,7 @@ export default function ExploreView(props) {
               backgroundColor: colors.background,
               borderRadius: 34,
               marginTop: '100%',
-              marginBottom: 20,
+              marginBottom: scrollMargin,
             }}
           >
             <FastImage
