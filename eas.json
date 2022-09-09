@@ -18,6 +18,12 @@
     "production": {}
   },
   "submit": {
-    "production": {}
+    "production": {
+      "ios": {
+        "appleId": "will.harrison.stone@gmail.com",
+        "ascAppId": "1644246004",
+        "appleTeamId": "UBTC64D4HH"
+      }
+    }
   }
 }

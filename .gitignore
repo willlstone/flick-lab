@@ -71,4 +71,8 @@ buck-out/
 web-build/
 dist/
 
+#publishing
+eas.json
+/ios/
+
 # @end expo-cli

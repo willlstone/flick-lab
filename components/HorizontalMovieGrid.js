@@ -42,10 +42,11 @@ export default function HorizontalMovieGrid({
                     navigation.navigate('Details', { id: moviePair[0].id, category });
                   }}
                 >
-                  <FastImage
+                  <Image
                     style={styles.singleRowPoster}
                     cacheKey={`${moviePair[0].id}-poster-${category}`}
-                    uri={`https://image.tmdb.org/t/p/w500/${moviePair[0].poster}`}
+                    // uri={`https://image.tmdb.org/t/p/w500/${moviePair[0].poster}`}
+                    source={{uri: `https://image.tmdb.org/t/p/w500/${moviePair[0].poster}`}}
                   />
                 </TouchableOpacity>
 
@@ -57,10 +58,11 @@ export default function HorizontalMovieGrid({
                       navigation.navigate('Details', { id: moviePair[1].id, category });
                     }}
                   >
-                    <FastImage
+                    <Image
                       style={styles.singleRowPoster}
                       cacheKey={`${moviePair[1].id}-poster-${category}`}
-                      uri={`https://image.tmdb.org/t/p/w500/${moviePair[1].poster}`}
+                      // uri={`https://image.tmdb.org/t/p/w500/${moviePair[1].poster}`}
+                      source={{uri: `https://image.tmdb.org/t/p/w500/${moviePair[1].poster}`}}
                     />
                   </TouchableOpacity>
                   )}

@@ -42,10 +42,11 @@ export default function HorizontalMovieList({
               navigation.push('Details', { id: movie.id, category });
             }}
           >
-            <FastImage
+            <Image
               style={styles.singleRowPoster}
               cacheKey={`${movie.id}-poster-${category}`}
-              uri={`https://image.tmdb.org/t/p/w500/${movie.poster}`}
+              // uri={`https://image.tmdb.org/t/p/w500/${movie.poster}`}
+              source={{uri: `https://image.tmdb.org/t/p/w500/${movie.poster}`}}
             />
           </TouchableOpacity>
         ))}
