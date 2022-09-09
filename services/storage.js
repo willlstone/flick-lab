@@ -12,9 +12,9 @@ export const getMovieWatchlist = async () => {
 export const saveMovieToWatchlist = async (movie) => {
     const cleanedMovie = {
         id: movie.id,
-        poster: movie.poster,
+        poster: movie.poster || movie.poster_path,
         title: movie.title,
-        backdrop: movie.backdrop
+        backdrop: movie.backdrop || movie.backdrop_path
     }
 
     try {

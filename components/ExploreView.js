@@ -12,11 +12,10 @@ import {
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import {
-  Title, useTheme, ToggleButton, IconButton,
+  Title, useTheme, IconButton,
 } from 'react-native-paper';
 import { fetchMovieCategory, handleLike } from '../services/api';
 import DoubleClick from './DoubleClick';
-import BackButton from './BackButton';
 import FastImage from '../helpers/FastImage';
 import GridSwitch from './GridSwitch';
 import { getMovieWatchlist, getTVWatchlist } from '../services/storage';
