@@ -8,6 +8,8 @@ import CardTest from '../components/CardTest';
 import AccountHome from '../components/AccountHome';
 import GridView from '../components/GridView';
 import { StateContext } from '../services/state';
+import Settings from '../components/Settings';
+import SortableGrid from '../components/SortableGrid';
 
 const Stack = createNativeStackNavigator();
 
@@ -31,10 +33,12 @@ export default function AccountPage() {
         }}
       >
         <Stack.Screen name="Home" component={AccountHome} />
+        <Stack.Screen name="Settings" component={Settings} />
         <Stack.Screen name="Explore" component={ExploreView} />
         <Stack.Screen name="Details" component={Details} />
         <Stack.Screen name="Images" component={CardTest} />
         <Stack.Screen name="Grid" component={GridView} />
+        <Stack.Screen name="SortableGrid" component={SortableGrid} />
       </Stack.Navigator>
     </NavigationContainer>
   );

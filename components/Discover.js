@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
-  View, ScrollView,
+  View, ScrollView, RefreshControl,
 } from 'react-native';
 import { SafeAreaInsetsContext } from 'react-native-safe-area-context';
 import { fetchMovieCategory, fetchTrending } from '../services/api';
@@ -14,6 +14,17 @@ export default function Discover({ navigation }) {
   const [topRated, setTopRated] = useState([]);
   const [upcoming, setUpcoming] = useState([]);
   const [trending, setTrending] = useState([]);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    setNowPlaying(await fetchMovieCategory('now_playing'));
+    setPopular(await fetchMovieCategory('popular'));
+    setTopRated(await fetchMovieCategory('top_rated'));
+    setUpcoming(await fetchMovieCategory('upcoming'));
+    setTrending(await fetchTrending('movie', 'week'));
+    setRefreshing(false);
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -35,7 +46,16 @@ export default function Discover({ navigation }) {
         {(insets) => <View style={{ paddingTop: insets.top }} />}
       </SafeAreaInsetsContext.Consumer>
 
-      <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={styles.container}
+        showsVerticalScrollIndicator={false}
+        refreshControl={(
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+          />
+      )}
+      >
         <MovieBanners movies={trending} title="Trending this Week" navigation={navigation} />
         <HorizontalMovieList movies={nowPlaying} title="Now Playing" func={fetchMovieCategory} param="now_playing" navigation={navigation} />
         <HorizontalMovieGrid movies={popular} title="Popular" func={fetchMovieCategory} param="popular" navigation={navigation} />

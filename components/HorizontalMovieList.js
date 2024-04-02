@@ -1,13 +1,13 @@
 import { useContext } from 'react';
 import {
-  ScrollView, TouchableOpacity, Image, View,
+  ScrollView, TouchableOpacity, Image, View, FlatList,
 } from 'react-native';
-import { Title, Button } from 'react-native-paper';
+import { Title, Button, Text } from 'react-native-paper';
 import { StateContext } from '../services/state';
 import Skeleton from './skeleton/HorizontalListSkeleton';
 import FastImage from '../helpers/FastImage';
 
-export default function HorizontalMovieList({
+export function HorizontalMovieList({
   movies, title, func, param, navigation, category,
 }) {
   const {
@@ -34,23 +34,29 @@ export default function HorizontalMovieList({
         </Button>
       </View>
 
-      <ScrollView style={styles.scrollView} horizontal showsHorizontalScrollIndicator={false}>
-        {movies?.map((movie) => (
+      <FlatList
+        style={styles.scrollView}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        data={movies}
+        initialNumToRender={3}
+        keyExtractor={(item) => `${item.id}-hlist`}
+        renderItem={({ item: movie, index }) => (
           <TouchableOpacity
             key={movie.id}
             onPress={() => {
               navigation.push('Details', { id: movie.id, category });
             }}
           >
-            <Image
+            <FastImage
               style={styles.singleRowPoster}
               cacheKey={`${movie.id}-poster-${category}`}
-              // uri={`https://image.tmdb.org/t/p/w500/${movie.poster}`}
-              source={{uri: `https://image.tmdb.org/t/p/w500/${movie.poster}`}}
+              uri={`https://image.tmdb.org/t/p/w500/${movie.poster}`}
+              // source={{ uri: `https://image.tmdb.org/t/p/w500/${movie.poster}` }}
             />
           </TouchableOpacity>
-        ))}
-      </ScrollView>
+        )}
+      />
     </>
   );
 }
@@ -75,3 +81,5 @@ const styles = {
     justifyContent: 'space-between',
   },
 };
+
+export default HorizontalMovieList;

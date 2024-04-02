@@ -8,6 +8,7 @@ import {
   FlatList,
   Dimensions,
   Animated,
+  Image,
 } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -145,17 +146,14 @@ export default function ExploreView(props) {
     };
 
     const windowHeight = Dimensions.get('window').height;
-    const scrollMargin = windowHeight < 750? 75 : 20;
+    const scrollMargin = windowHeight < 750 ? 75 : 20;
 
     return (
       <DoubleClick
         icon
         delay={300}
         timeout={1000}
-        doubleClick={() => {
-          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-          handleLike(item, category);
-        }}
+        doubleClick={handleTapHeart}
         singleClick={() => {
           navigation.navigate('Details', { id: item.id, category });
         }}

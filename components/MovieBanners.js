@@ -8,10 +8,14 @@ import FastImage from '../helpers/FastImage';
 export default function MovieBanners({
   movies, title, navigation, category,
 }) {
-  if (!movies || movies.length === 0) {
+  if (!movies) {
     return (
       <MyLoader />
     );
+  }
+
+  if (movies?.length === 0) {
+    return null;
   }
 
   return (

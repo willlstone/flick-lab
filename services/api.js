@@ -54,7 +54,7 @@ const genres = {
 const API_URL = `https://api.themoviedb.org/3/discover/movie?api_key=${API_KEY}&sort_by=popularity.desc`;
 
 const getPosterPath = (path) =>
-  `https://image.tmdb.org/t/p/w780${path}`;
+  `https://image.tmdb.org/t/p/w500${path}`;
 const getBackground = (path) =>
   `https://image.tmdb.org/t/p/w1280${path}`;
   const getProfile = (path) =>
@@ -170,7 +170,13 @@ export async function fetchCast(id, category = "movie") {
     const cast = data.cast
     .filter(crewMember => crewMember.known_for_department === 'Acting')
     .filter(castMember => castMember.profile_path)
-    .map(castMember => getProfile(castMember.profile_path));
+    .map(castMember => {
+      return {
+        pic: getProfile(castMember.profile_path),
+        actorName: castMember.name,
+        characterName: castMember.character,
+      }
+    });
     return cast;
   } catch (error) {
     console.log.apply(error)

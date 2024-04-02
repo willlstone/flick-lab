@@ -1,11 +1,12 @@
-import React from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import {
   MD3DarkTheme, MD3LightTheme as DefaultTheme, Provider as PaperProvider,
 } from 'react-native-paper';
 import { useColorScheme, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import Navigation from './components/Navigation';
-import { StateContextProvider } from './services/state';
+import { StateContextProvider, StateContext } from './services/state';
+import { getTheme } from './services/storage';
 
 const lightTheme = {
   ...DefaultTheme,
@@ -39,12 +40,51 @@ const darkTheme = {
 
 export default function App() {
   const scheme = useColorScheme();
+  const [current, setCurrent] = useState('light');
+
+  const { themeReset } = useContext(StateContext);
+
+  useEffect(() => {
+    const currentTheme = async () => {
+      const savedTheme = await getTheme();
+      let setScheme;
+      if (savedTheme === 'light') setScheme = 'light';
+      else if (savedTheme === 'dark') setScheme = 'dark';
+      else setScheme = scheme;
+      setCurrent(setScheme);
+    };
+    currentTheme();
+  }, [themeReset]);
+
   return (
-    <PaperProvider theme={scheme === 'dark' ? darkTheme : lightTheme}>
+    <StateContextProvider>
+      <ThemeWrapper />
+    </StateContextProvider>
+
+  );
+}
+
+function ThemeWrapper() {
+  const scheme = useColorScheme();
+  const [current, setCurrent] = useState('light');
+  const { themeReset } = useContext(StateContext);
+
+  useEffect(() => {
+    const currentTheme = async () => {
+      const savedTheme = await getTheme();
+      let setScheme;
+      if (savedTheme === 'light') setScheme = 'light';
+      else if (savedTheme === 'dark') setScheme = 'dark';
+      else setScheme = scheme;
+      setCurrent(setScheme);
+    };
+    currentTheme();
+  }, [themeReset]);
+
+  return (
+    <PaperProvider theme={current === 'dark' ? darkTheme : lightTheme}>
       <SafeAreaProvider>
-        <StateContextProvider>
-          <Navigation />
-        </StateContextProvider>
+        <Navigation />
       </SafeAreaProvider>
     </PaperProvider>
   );

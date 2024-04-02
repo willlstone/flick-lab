@@ -48,7 +48,6 @@ export default memo(({ uri, cacheKey, style, animated, addLogging, ...props }) =
             // }
             
             const cacheFileUri = `${FileSystem.cacheDirectory}${cacheKey}`;
-            // console.log(FileSystem.cacheDirectory, cacheKey);
             let imgInCache = await checkImageInCache(cacheFileUri);
 
             if (!imgInCache.exists) {

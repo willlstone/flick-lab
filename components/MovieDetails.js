@@ -3,15 +3,17 @@ import React, {
 } from 'react';
 import {
   View, Image, Animated,
-  StyleSheet,
+  StyleSheet, Dimensions, TouchableOpacity, useColorScheme,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import MaskedView from '@react-native-community/masked-view';
 import {
-  Caption, Title, Chip, ActivityIndicator, useTheme, IconButton,
+  Caption, Title, Chip, ActivityIndicator, useTheme, IconButton, Button, Text,
 } from 'react-native-paper';
 import * as Haptics from 'expo-haptics';
+import { BottomSheet } from 'react-native-btr';
+import { useFonts } from 'expo-font';
 import Overview from './DummyText';
 import { BANNER_H } from './constants';
 import Gridception from './ImageGrid';
@@ -22,24 +24,61 @@ import {
 import HorizontalMovieList from './HorizontalMovieList';
 import MovieBanners from './MovieBanners';
 import Cast from './Cast';
-import { getMovieWatchlist, getTVWatchlist } from '../services/storage';
+import {
+  getMovieWatchlist, getTVWatchlist, getMovieRatings, rateMovie, getTVRatings, rateTV,
+} from '../services/storage';
 
 function Details(props) {
   const { route, navigation } = props;
   const { id, category = 'movie' } = route?.params;
 
-  const { colors } = useTheme();
+  const theme = useTheme();
+  const scheme = useColorScheme();
+  const { width, height } = Dimensions.get('window');
 
   const [movie, setMovie] = useState({});
   const [images, setImages] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [movieWatchlist, setMovieWatchlist] = useState([]);
   const [tvWatchlist, setTVWatchlist] = useState([]);
+  const [movieRatings, setMovieRatings] = useState([]);
+  const [tvRatings, setTVRatings] = useState([]);
+  const [visible, setVisible] = useState(false);
+
+  const [fontsLoaded] = useFonts({
+    Avenida: require('../assets/fonts/AVENIDA.ttf'),
+  });
+
+  const { colors } = theme;
+  const gradeColor = theme.dark ? 'white' : 'rgba(28, 27, 31, 1)';
+
+  const movieGrade = category === 'movie'
+    ? movieRatings?.find((item) => item.id === movie.id)?.grade
+    : tvRatings.find((item) => item.id === movie.id)?.grade;
+
+  const toggleVisible = () => {
+    setVisible(!visible);
+  };
+
+  const handleSetGrade = async (grade) => {
+    await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    if (category === 'movie') {
+      await rateMovie(movie, grade);
+      setMovieRatings(await getMovieRatings());
+    } else {
+      await rateTV(movie, grade);
+      setTVRatings(await getTVRatings());
+    }
+
+    setVisible(false);
+  };
 
   useEffect(() => {
     const getData = async () => {
       setMovieWatchlist(await getMovieWatchlist());
       setTVWatchlist(await getTVWatchlist());
+      setMovieRatings(await getMovieRatings());
+      setTVRatings(await getTVRatings());
     };
     getData();
   }, []);
@@ -191,6 +230,13 @@ function Details(props) {
                 )}
 
               <View style={styles.row}>
+                { movieGrade
+                && (
+                  <View style={styles.gradeViewSmall}>
+                    <Text style={{ ...styles.gradeTextSmall }}>{movieGrade}</Text>
+                  </View>
+                )}
+
                 <View style={styles.col}>
                   <Image
                     style={{ width: 23, aspectRatio: 32 / 23 }}
@@ -258,6 +304,7 @@ function Details(props) {
           />
         </View>
 
+        { recommendations?.length > 0 && (
         <View style={{ marginLeft: 24 }}>
           <HorizontalMovieList
             title="Recommendations"
@@ -266,15 +313,157 @@ function Details(props) {
             category={category}
           />
         </View>
+        )}
 
         <Cast id={movie.id} category={category} />
 
+        <Button
+          icon="share"
+          mode="contained-tonal"
+          onPress={toggleVisible}
+          style={{ marginHorizontal: 24 }}
+        >
+          Rate
+        </Button>
+
       </Animated.ScrollView>
+
+      <BottomSheet
+        visible={visible}
+        onBackButtonPress={toggleVisible}
+        onBackdropPress={toggleVisible}
+      >
+        <View style={{ ...styles.bottomNavigationView, backgroundColor: colors.background }}>
+          <View
+            style={{
+            }}
+          >
+            <Title
+              style={styles.centeredTitle}
+            >
+              Give Rating
+            </Title>
+
+            <View style={{ display: 'flex', flexDirection: 'column', alignItems: 'space-around' }}>
+
+              <View style={{
+                display: 'flex', flexDirection: 'row', justifyContent: 'space-around', width, marginBottom: 10,
+              }}
+              >
+
+                <TouchableOpacity style={movieGrade === 'A+' ? styles.selectedGradeView : styles.gradeView(gradeColor)} onPress={() => handleSetGrade('A+')}>
+                  <Title style={{ ...styles.gradeText, color: movieGrade === 'A+' ? 'white' : gradeColor }}>A+</Title>
+                </TouchableOpacity>
+
+                <TouchableOpacity style={movieGrade === 'B+' ? styles.selectedGradeView : styles.gradeView(gradeColor)} onPress={() => handleSetGrade('B+')}>
+                  <Title style={{ ...styles.gradeText, color: movieGrade === 'B+' ? 'white' : gradeColor }}>B+</Title>
+                </TouchableOpacity>
+
+                <TouchableOpacity style={movieGrade === 'C+' ? styles.selectedGradeView : styles.gradeView(gradeColor)} onPress={() => handleSetGrade('C+')}>
+                  <Title style={{ ...styles.gradeText, color: movieGrade === 'C+' ? 'white' : gradeColor }}>C+</Title>
+                </TouchableOpacity>
+
+                <TouchableOpacity style={movieGrade === 'D+' ? styles.selectedGradeView : styles.gradeView(gradeColor)} onPress={() => handleSetGrade('D+')}>
+                  <Title style={{ ...styles.gradeText, color: movieGrade === 'D+' ? 'white' : gradeColor }}>D+</Title>
+                </TouchableOpacity>
+
+              </View>
+
+              <View style={{
+                display: 'flex', flexDirection: 'row', justifyContent: 'space-around', width, marginBottom: 10,
+              }}
+              >
+
+                <TouchableOpacity style={movieGrade === 'A' ? styles.selectedGradeView : styles.gradeView(gradeColor)} onPress={() => handleSetGrade('A')}>
+                  <Title style={{ ...styles.gradeText, color: movieGrade === 'A' ? 'white' : gradeColor }}>A</Title>
+                </TouchableOpacity>
+
+                <TouchableOpacity style={movieGrade === 'B' ? styles.selectedGradeView : styles.gradeView(gradeColor)} onPress={() => handleSetGrade('B')}>
+                  <Title style={{ ...styles.gradeText, color: movieGrade === 'B' ? 'white' : gradeColor }}>B</Title>
+                </TouchableOpacity>
+
+                <TouchableOpacity style={movieGrade === 'C' ? styles.selectedGradeView : styles.gradeView(gradeColor)} onPress={() => handleSetGrade('C')}>
+                  <Title style={{ ...styles.gradeText, color: movieGrade === 'C' ? 'white' : gradeColor }}>C</Title>
+                </TouchableOpacity>
+
+                <TouchableOpacity style={movieGrade === 'D' ? styles.selectedGradeView : styles.gradeView(gradeColor)} onPress={() => handleSetGrade('D')}>
+                  <Title style={{ ...styles.gradeText, color: movieGrade === 'D' ? 'white' : gradeColor }}>D</Title>
+                </TouchableOpacity>
+
+              </View>
+              <View style={{
+                display: 'flex', flexDirection: 'row', justifyContent: 'space-around', width,
+              }}
+              >
+
+                <TouchableOpacity style={movieGrade === 'A-' ? styles.selectedGradeView : styles.gradeView(gradeColor)} onPress={() => handleSetGrade('A-')}>
+                  <Title style={{ ...styles.gradeText, color: movieGrade === 'A-' ? 'white' : gradeColor }}>A-</Title>
+                </TouchableOpacity>
+
+                <TouchableOpacity style={movieGrade === 'B-' ? styles.selectedGradeView : styles.gradeView(gradeColor)} onPress={() => handleSetGrade('B-')}>
+                  <Title style={{ ...styles.gradeText, color: movieGrade === 'B-' ? 'white' : gradeColor }}>B-</Title>
+                </TouchableOpacity>
+
+                <TouchableOpacity style={movieGrade === 'C-' ? styles.selectedGradeView : styles.gradeView(gradeColor)} onPress={() => handleSetGrade('C-')}>
+                  <Title style={{ ...styles.gradeText, color: movieGrade === 'C-' ? 'white' : gradeColor }}>C-</Title>
+                </TouchableOpacity>
+
+                <TouchableOpacity style={movieGrade === 'F' ? styles.selectedGradeView : styles.gradeView(gradeColor)} onPress={() => handleSetGrade('F')}>
+                  <Title style={{ ...styles.gradeText, color: movieGrade === 'F' ? 'white' : gradeColor }}>F</Title>
+                </TouchableOpacity>
+
+              </View>
+            </View>
+          </View>
+        </View>
+      </BottomSheet>
+
     </View>
   );
 }
 
 const styles = {
+  gradeView: (color) => ({
+    borderColor: color,
+    borderWidth: 1,
+    width: 50,
+    height: 50,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+  }),
+  selectedGradeView: {
+    borderColor: 'white',
+    backgroundColor: '#71D7C0',
+    borderWidth: 1,
+    width: 50,
+    height: 50,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  gradeText: {
+    fontFamily: 'Avenida',
+    color: 'white',
+    fontWeight: '600',
+    fontSize: 30,
+  },
+  gradeViewSmall: {
+    marginRight: 8,
+    borderColor: 'white',
+    borderWidth: 1,
+    width: 25,
+    height: 25,
+    borderRadius: 6,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  gradeTextSmall: {
+    fontFamily: 'Avenida',
+    color: 'white',
+    fontWeight: '600',
+    fontSize: 16,
+  },
   score: {
     margin: 5,
   },
@@ -296,6 +485,11 @@ const styles = {
     width: '100%',
     height: '100%',
     zIndex: 9,
+  },
+  centeredTitle: {
+    textAlign: 'center',
+    marginBottom: 10,
+    fontWeight: '800',
   },
   rowHeader: {
     marginLeft: 24,
@@ -346,6 +540,12 @@ const styles = {
     flex: 1,
     justifyContent: 'center',
     marginTop: -200,
+  },
+  bottomNavigationView: {
+    width: '100%',
+    height: '33%',
+    // justifyContent: 'center',
+    // alignItems: 'center',
   },
   banner: (scrollA) => ({
     height: BANNER_H,

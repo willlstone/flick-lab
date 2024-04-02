@@ -58,7 +58,7 @@ export default function GridView(props) {
           <TouchableOpacity
             key={movie.id}
             onPress={() => {
-              navigation.push('Details', { id: movie.id });
+              navigation.push('Details', { id: movie.id, category });
             }}
           >
             <FastImage

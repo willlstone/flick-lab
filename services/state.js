@@ -12,6 +12,7 @@ export const StateContextProvider = ({children, initialIsLoading = false}) => {
     const [exploreParam, setExploreParam] = useState("");
     const [isLoading, setIsLoading] = useState(initialIsLoading);
     const [tabIsReset, resetTab] = useState(false);
+    const [themeReset, setThemeReset] = useState(false);
 
     const useSetMovie = async (id) => {
         setIsLoading(true);
@@ -25,7 +26,9 @@ export const StateContextProvider = ({children, initialIsLoading = false}) => {
         <Provider
         value={{
            tabIsReset,
-           resetTab
+           resetTab,
+           themeReset,
+           setThemeReset,
         }}>
             {children}
         </Provider>

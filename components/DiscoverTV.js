@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
-  View, ScrollView,
+  View, ScrollView, RefreshControl,
 } from 'react-native';
 import { SafeAreaInsetsContext } from 'react-native-safe-area-context';
 import { fetchMovieCategory, fetchTrending } from '../services/api';
@@ -13,6 +13,18 @@ export default function DiscoverTV({ navigation }) {
   const [popular, setPopular] = useState([]);
   const [topRated, setTopRated] = useState([]);
   const [upcoming, setUpcoming] = useState([]);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    setAiringToday(await fetchMovieCategory('airing_today', 1, 'tv'));
+    setPopular(await fetchMovieCategory('popular', 1, 'tv'));
+    setTopRated(await fetchMovieCategory('top_rated', 1, 'tv'));
+    setUpcoming(await fetchMovieCategory('on_the_air', 1, 'tv'));
+    setRefreshing(false);
+  }, []);
+
+  console.log(airingToday);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -33,7 +45,16 @@ export default function DiscoverTV({ navigation }) {
         {(insets) => <View style={{ paddingTop: insets.top }} />}
       </SafeAreaInsetsContext.Consumer>
 
-      <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={styles.container}
+        showsVerticalScrollIndicator={false}
+        refreshControl={(
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+          />
+        )}
+      >
         <MovieBanners movies={airingToday.filter((show) => show.language === 'en')} title="Airing Today" navigation={navigation} category="tv" />
         <HorizontalMovieGrid movies={popular} title="Popular" param="popular" navigation={navigation} category="tv" />
         <HorizontalMovieList movies={upcoming} title="This Week" param="on_the_air" navigation={navigation} category="tv" />

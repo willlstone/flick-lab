@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { ScrollView, View, Image } from 'react-native';
-import { Title } from 'react-native-paper';
+import { View, Image, FlatList } from 'react-native';
+import { Title, Text, Caption } from 'react-native-paper';
 import { fetchCast } from '../services/api';
 
 export default function Cast({ id, category }) {
@@ -22,13 +22,22 @@ export default function Cast({ id, category }) {
       <View style={styles.titleRow}>
         <Title style={styles.rowHeader}>Cast</Title>
       </View>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-        {cast?.map((member) => (
-          <View style={styles.card} key={member}>
-            <Image source={{ uri: member }} style={styles.castPhoto} resizeMode="cover" />
-          </View>
-        ))}
-      </ScrollView>
+      <FlatList
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        data={cast}
+        initialNumToRender={3}
+        renderItem={({ item, index }) => {
+          const { pic, actorName, characterName } = item;
+          return (
+            <View style={styles.card} key={actorName}>
+              <Image source={{ uri: pic }} style={styles.castPhoto} resizeMode="cover" />
+              <Text>{actorName}</Text>
+              <Caption>{characterName}</Caption>
+            </View>
+          );
+        }}
+      />
     </View>
   );
 }
@@ -45,6 +54,7 @@ const styles = {
     marginRight: 12,
     borderRadius: 12,
     marginBottom: 10,
+    width: 125,
   },
   castPhoto: {
     borderRadius: 12,
